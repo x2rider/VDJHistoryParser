@@ -40,12 +40,17 @@ for ($i = 1; $i -lt $systemDrives.Count; $i++) {
         $databaseFileName = "$($drive)\VirtualDj\database.xml"
     }
 
-    # If there is a VDJ database file on this drive, load it
-    if(Test-Path -Path $databaseFileName) {
-        Write-Host("Loading database $($databaseFileName)")
-        [xml]$databaseFile = Get-Content $databaseFileName
-        AddSongsFromDatabase($databaseFile)
-        Write-Host("Loading Complete")
+    try {
+        # If there is a VDJ database file on this drive, load it
+        if(Test-Path -Path $databaseFileName) {
+            Write-Host("Loading database $($databaseFileName)")
+            [xml]$databaseFile = Get-Content $databaseFileName
+            AddSongsFromDatabase($databaseFile)
+            Write-Host("Loading Complete")
+        }
+    }
+    catch {
+        Write-Host "Unable to open database file $($databaseFileName)"
     }
 }
 
@@ -59,67 +64,78 @@ if($songs.Count -gt 0){
         [string]$author = ""
         [string]$title = ""
 
-        # Read history files
-        Write-Host "Parsing History File: $($historyFile.Name)"
-        [string[]]$fileData = Get-Content -Path $historyFile.FullName | Select-String -Pattern $filter -NotMatch
-        foreach ($songKey in $fileData) {
-            $songInfo = $songs[$songKey]
+        try {
+            # Read history files
+            [string[]]$fileData = Get-Content -Path $historyFile.FullName | Select-String -Pattern $filter -NotMatch
+            Write-Host "Parsing History File: $($historyFile.Name)"
+            foreach ($songKey in $fileData) {
+                $songInfo = $songs[$songKey]
 
-            $author = ""
-            $title = ""
+                $author = ""
+                $title = ""
 
-            if(-not($null -eq $songInfo.Tags)){
-                $author = $songInfo.Tags.Attributes["Author"].Value
-                $title = $songInfo.Tags.Attributes["Title"].Value
-            }
-
-            if($author.Length -eq 0 -or $title.Length -eq 0) 
-            {
-                # Attempt to parse Artist/Title from filename
-                # Supported filename convention:
-                # Artist - Title.ext
-                $delimiter = "\\" #Windows Path Delimiter
-                if($songKey.LastIndexOf("\\") -lt 0){
-                    if($songKey.LastIndexOf("/") -gt 0){
-                        $delimiter = "/" # in case a mac os history file is read
-                    }
+                if(-not($null -eq $songInfo.Tags)){
+                    $author = $songInfo.Tags.Attributes["Author"].Value
+                    $title = $songInfo.Tags.Attributes["Title"].Value
                 }
 
-                [string[]]$keySplit = $songKey.split($delimiter)
-                $tempString = $keySplit[$keySplit.Length - 1]
-                $tempString = $tempString.split(".")[0]
-
-                [string[]]$tempStringArray = $tempString.Replace(" - ", ",").Split(",")
-                if($tempStringArray.Count -gt 1){
-                    $author = $tempStringArray[0]
-                    for ($i = 1; $i -lt $tempStringArray.Count; $i++) {
-                        $title = "$($title)$($tempStringArray[$i])"
+                if($author.Length -eq 0 -or $title.Length -eq 0) 
+                {
+                    # Attempt to parse Artist/Title from filename
+                    # Supported filename convention:
+                    # Artist - Title.ext
+                    $delimiter = "\\" #Windows Path Delimiter
+                    if($songKey.LastIndexOf("\\") -lt 0){
+                        if($songKey.LastIndexOf("/") -gt 0){
+                            $delimiter = "/" # in case a mac os history file is read
+                        }
                     }
+
+                    [string[]]$keySplit = $songKey.split($delimiter)
+                    $tempString = $keySplit[$keySplit.Length - 1]
+                    $tempString = $tempString.split(".")[0]
+
+                    [string[]]$tempStringArray = $tempString.Replace(" - ", ",").Split(",")
+                    if($tempStringArray.Count -gt 1){
+                        $author = $tempStringArray[0]
+                        for ($i = 1; $i -lt $tempStringArray.Count; $i++) {
+                            $title = "$($title)$($tempStringArray[$i])"
+                        }
+                    } else {
+                        $author = $tempString
+                    }
+                }
+                
+                $songStatisticExists = $songStats.ContainsKey($songKey)
+                if($false -eq $songStatisticExists) {
+                    $songStatistic = [SongStat]::new()
+                    $songStatistic.Author = $author
+                    $songStatistic.Title = $title
+                    $songStatistic.PlayCount = 1
+                    $songStatistic.FileName = $songKey
+                
+                    $songStats.Add($songKey, $songStatistic)
                 } else {
-                    $author = $tempString
+                    $songStatistic = $songStats[$songKey]
+                    $songStatistic.PlayCount = $songStatistic.PlayCount + 1
                 }
             }
-            
-            $songStatisticExists = $songStats.ContainsKey($songKey)
-            if($false -eq $songStatisticExists) {
-                $songStatistic = [SongStat]::new()
-                $songStatistic.Author = $author
-                $songStatistic.Title = $title
-                $songStatistic.PlayCount = 1
-                $songStatistic.FileName = $songKey
-            
-                $songStats.Add($songKey, $songStatistic)
-            } else {
-                $songStatistic = $songStats[$songKey]
-                $songStatistic.PlayCount = $songStatistic.PlayCount + 1
-            }
+        }
+        catch {
+            Write-Host "Unable to open history file $($historyFile.FullName)"
         }
     }
 
-    # Write out results
-    $outfile = "$($documentsDir)\VDJHistoryPlayCount.csv"
-    $songStats.Values | Sort-Object -Descending -Property PlayCount | Export-Csv -NoTypeInformation $outfile
-    Write-Host "Statistics written to: $($outfile)"
+    try {
+        # Write out results
+        $outfile = "$($documentsDir)\VDJHistoryPlayCount.csv"
+        $songStats.Values | Sort-Object -Descending -Property PlayCount | Export-Csv -NoTypeInformation $outfile
+        Write-Host "Statistics written to: $($outfile)"        
+    }
+    catch {
+        Write-Host "Error saving CSV file, do you have it open in another program?"
+    }
+
 }
 else {
     Write-Host "No songs loaded from database"
