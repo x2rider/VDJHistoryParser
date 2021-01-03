@@ -119,6 +119,7 @@ if($songs.Count -gt 0){
     # Write out results
     $outfile = "$($documentsDir)\VDJHistoryPlayCount.csv"
     $songStats.Values | Sort-Object -Descending -Property PlayCount | Export-Csv -NoTypeInformation $outfile
+    Write-Host "Statistics written to: $($outfile)"
 }
 else {
     Write-Host "No songs loaded from database"
