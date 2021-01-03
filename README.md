@@ -1,6 +1,10 @@
 # VDJHistoryParser
 Powershell script that parses VirtualDJ history files and creates a playcount total CSV file
 
+While VirtualDJ does record playcount of a track, over time, the play count can get out of sync, maybe due to library maintenance, or maybe someone had to start fresh with a new database, the playcount can get out of sync over time.
+By using this script, you can view the actual playcounts of a track based off of your actual history files.
+This assumes you have all of your history files, and they are up to date.
+
 PC Version, not tested on PowerShell/Mac
 
 Loads Virtual DJ databases across all connected drives
