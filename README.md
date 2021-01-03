@@ -18,3 +18,5 @@ The file path that maps to the database entry is provided in the output file so 
 For example, Brown Eyed Girl had multiple entries when I was doing testing.
 What I found was that the file location didn't always match, but VDJ still loaded the files from history ok.
 You can correct these counts by updating the history files.
+
+If you get error "Export-Csv : The process cannot access the file", you may have the file open in Excel.  Be sure to close the file in Excel before running the script again.
