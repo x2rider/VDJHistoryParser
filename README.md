@@ -5,10 +5,14 @@ While VirtualDJ does record playcount of a track, the playcount can get out of s
 By using this script, you can view the actual playcounts of a track based off of your actual history files.
 This assumes you have all of your history files, and they are up to date.
 
-PC Version, not tested on PowerShell/Mac
-
-Loads Virtual DJ databases across all connected drives.
+This Script loads Virtual DJ databases across all connected drives.
 Searches history files and counts how many times a file has been played.
+
+PC and Mac compatible
+
+# Mac Users
+
+Install PowerShell for mac following instructions by Microsoft: https://docs.microsoft.com/en-us/powershell/scripting/install/installing-powershell-core-on-macos?view=powershell-7.1
 
 # Things to watch out for
 History files tend to get out of date, or not match the file path exactly.
