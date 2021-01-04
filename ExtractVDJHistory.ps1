@@ -41,7 +41,7 @@ $systemDrives = [System.IO.DriveInfo]::getdrives() | Where-Object -Property Tota
 #for ($i = 0; $i -lt $systemDrives.Count; $i++) {
 #    [string]$drive = $systemDrives[$i].RootDirectory.Trim()
 foreach($disk in $systemDrives) {
-    $drive = $disk.RootDirectory
+    $drive = $disk.Name
     if($drive -eq "Temp" -or $drive -eq "Name") {
         $databaseFileName = ""
     } elseif($drive -eq "C:\" -or $drive -eq "/"){
@@ -49,12 +49,14 @@ foreach($disk in $systemDrives) {
         $databaseFileName = "$($documentsDir)\VirtualDj\database.xml"
     } else {
         # all others at root
-        $databaseFileName = "$($drive)\VirtualDj\database.xml"
+        $databaseFileName = "$($drive)VirtualDj\database.xml"
     }
 
     if($isMacOS)
     {
         $databaseFileName = $databaseFileName.Replace("\", "/")
+    } else {
+        $databaseFileName = $databaseFileName.Replace("\\", "\")
     }
 
     try {
