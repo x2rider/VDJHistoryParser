@@ -23,4 +23,4 @@ For example, Brown Eyed Girl had multiple entries when I was doing testing.
 What I found was that the file location didn't always match, but VDJ still loaded the files from history ok.
 You can correct these counts by updating the history files.
 
-If you get error "Export-Csv : The process cannot access the file", you may have the file open in Excel.  Be sure to close the file in Excel before running the script again.
+The process cannot access the file if you have the file open in Excel.  Be sure to close the file in Excel before running the script again.
