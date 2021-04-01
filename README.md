@@ -2,6 +2,7 @@
 Powershell script that parses VirtualDJ history files and creates a playcount total CSV file
 
 While VirtualDJ does record playcount of a track, the playcount can get out of sync over time due to library maintenance, or maybe someone started fresh with a new database.
+
 VirtualDJ also has a tracklist file in the history folder, I've found that not to be reliable.  For example, I have history files from 2005, but my tracklist history file only goes back to 2019, which is when I switched laptops.  I also have a primary and backup laptop.  The backup laptop is sometimes used for different events.  I keep history files synced over the cloud, so this lets me add history files from all of my VDJ machines, so I'll get better statisitics.
 
 
